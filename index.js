@@ -42,8 +42,37 @@ app.post('/webhook/', function (req, res) {
         if (event.message && event.message.text) {
             let messageText = event.message.text;
 
+            sendReply(sender, messageText);
         }
     }
 
     res.sendStatus(200);
 });
+
+function sendReply(sender, messageReceived) {
+    let replyMessage = 'Message received: ' + messageReceived;
+
+    let data = {
+        message: replyMessage
+    };
+
+    request({
+        url: 'https://graph.facebook.com/v2.6/me/messages',
+        qs: {
+            access_token: page_access_token
+        },
+        method: 'POST',
+        json: {
+            recipient: {
+                id: sender
+            },
+            message: data
+        }
+    }, function(err, res, body) {
+        if (err) {
+            console.error('Error with sending messages: ' + err);
+        } else if (res.body.error) {
+            console.error('Error with response body: ' + res.body.error);
+        }
+    });
+}
