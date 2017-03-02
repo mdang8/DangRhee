@@ -14,7 +14,7 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 
 app.get('/', function (req, res) {
-    res.send('Hello world!');
+    res.send('Welcome to DangRhee!');
 });
 
 app.get('/webhook/', function (req, res) {
