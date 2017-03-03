@@ -49,6 +49,10 @@ app.post('/webhook/', function (req, res) {
     res.sendStatus(200);
 });
 
+app.post('/privacy-policy/', function (req, res) {
+    res.sendStatus(200);
+});
+
 function sendReply(sender, messageReceived) {
     let replyMessage = 'Message received: ' + messageReceived;
 
