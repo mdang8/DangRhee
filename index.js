@@ -28,6 +28,10 @@ app.get('/webhook/', function (req, res) {
     res.send('Wrong token.');
 });
 
+app.get('/privacy-policy/', function (req, res) {
+    res.sendStatus(200);
+});
+
 app.listen(app.get('port'), function() {
     console.log('Running on port', app.get('port'));
 });
