@@ -47,7 +47,7 @@ app.post('/webhook/', function (req, res) {
 
         if (event.message && event.message.text) {
             let messageText = event.message.text;
-            sendReply(sender, messageText);
+            sendReply(sender, messageText.substring(0, 200));
         }
     }
 
