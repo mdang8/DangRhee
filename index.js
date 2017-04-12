@@ -42,7 +42,7 @@ app.post('/webhook/', function (req, res) {
 
     for (let i = 0; i < messagingEvents.length; i++) {
         let event = req.body.entry[0].messaging[i];
-        let sender = event.sender.id;
+        let sender = event.sender;
 
         if (event.message && event.message.text) {
             let messageText = event.message.text;
@@ -88,11 +88,11 @@ function chooseReply(sender, message) {
 
         let formattedDate = splitDate[2] + '-' + splitDate[0] + '-' + splitDate[1];
 
-        if (location === 'boston') {
+        if (location.toLowerCase() === 'boston') {
             queryStr = 'SELECT * FROM WeatherData WHERE zipcode = "02115" AND date = "' + formattedDate + '"';
-        } else if (location === 'new york city') {
+        } else if (location.toLowerCase() === 'new york city') {
             queryStr = 'SELECT * FROM WeatherData WHERE zipcode = "10001" AND date = "' + formattedDate + '"';
-        } else if (location === 'san francisco') {
+        } else if (location.toLowerCase() === 'san francisco') {
             queryStr = 'SELECT * FROM WeatherData WHERE zipcode = "94016" AND date = "' + formattedDate + '"';
         } else {
             reply = 'Not a valid location.';
@@ -118,7 +118,7 @@ function chooseReply(sender, message) {
                 precipitation = 'None';
             }
 
-            reply = 'The weather for ' + location.toUpperCase() + ' on ' + date + ' is as follows:\n' + 'High Temperature = ' +
+            reply = 'The weather for ' + location + ' on ' + date + ' is as follows:\n' + 'High Temperature = ' +
                     tempHigh + ' °F\n' + 'Low Temperature = ' + tempLow + ' °F\n' + 'Humidity = ' + humidity + '%\n' +
                     'Precipitation = ' + precipitation;
 
@@ -132,13 +132,20 @@ function chooseReply(sender, message) {
 }
 
 function sendReply(sender, text) {
-    let messageData = { text:text };
+    let messageData = {
+        text: 'To: ' + sender.name + '\n' + text
+    };
+
     request({
         url: 'https://graph.facebook.com/v2.6/me/messages',
-        qs: {access_token:page_access_token},
+        qs: {
+            access_token: page_access_token
+        },
         method: 'POST',
         json: {
-            recipient: {id:sender},
+            recipient: {
+                id: sender.id
+            },
             message: messageData,
         }
     }, function(error, response, body) {
