@@ -74,7 +74,7 @@ function sendReply(sender, messageReceived) {
     let replyMessage = 'Message received: ' + messageReceived;
 
     let data = {
-        message: replyMessage
+        message: "Test received"
     };
 
     request({
