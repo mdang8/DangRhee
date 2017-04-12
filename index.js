@@ -55,17 +55,20 @@ app.listen(app.get('port'), function() {
 // });
 
 app.post('/webhook/', function (req, res) {
-    let messaging_events = req.body.entry[0].messaging
-    for (let i = 0; i < messaging_events.length; i++) {
-        let event = req.body.entry[0].messaging[i]
-        let sender = event.sender.id
+    let messagingEvents = req.body.entry[0].messaging;
+
+    for (let i = 0; i < messagingEvents.length; i++) {
+        let event = req.body.entry[0].messaging[i];
+        let sender = event.sender.id;
+
         if (event.message && event.message.text) {
-            let text = event.message.text
-            sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200))
+            let messageText = event.message.text;
+            sendTextMessage(sender, messageText);
         }
     }
-    res.sendStatus(200)
-})
+
+    res.sendStatus(200);
+});
 
 app.post('/privacy-policy/', function (req, res) {
     res.sendStatus(200);
