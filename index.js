@@ -133,7 +133,7 @@ function chooseReply(sender, message) {
 
 function sendReply(sender, text) {
     let messageData = {
-        text: 'To: ' + sender.name + '\n' + text
+        text: 'To: ' + sender.id + '\n\n' + text
     };
 
     request({
