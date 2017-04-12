@@ -74,10 +74,9 @@ function chooseReply(sender, message) {
         });
 
         databaseConnection.connect();
-
-        splitMsg = message.split(' ');
-        location = splitMsg[5];
-        date = splitMsg[7];
+        
+        location = message.substring(23, message.lastIndexOf('on'));
+        date = message.substring(message.lastIndexOf('on') + 3);
         splitDate = [];
 
         if (date.includes('-')) {
@@ -133,7 +132,7 @@ function chooseReply(sender, message) {
 
 function sendReply(sender, text) {
     let messageData = {
-        text: 'To: ' + sender.id + '\n\n' + text
+        text: 'To: ' + sender.id + ' ' + sender.first_name + '\n\n' + text
     };
 
     request({
