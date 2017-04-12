@@ -43,8 +43,6 @@ function chooseReply(message) {
             reply = 'Not a valid location.';
         }
 
-        console.log(queryStr);
-
         databaseConnection.query(queryStr, function(err, results, fields) {
             if (err) {
                 throw err;
@@ -56,7 +54,16 @@ function chooseReply(message) {
             humidity = jsonResults.humidity;
             precipitation = jsonResults.precipitation;
 
-            console.log(tempHigh);
+            if (precipitation === '') {
+                precipitation = 'None';
+            }
+
+            reply = 'The weather for ' + location.toUpperCase() + ' on ' + date + ' is as follows:\n' + 'High Temperature = ' +
+                tempHigh + ' °F\n' + 'Low Temperature = ' + tempLow + ' °F\n' + 'Humidity = ' + humidity + '%\n' +
+                'Precipitation = ' + precipitation;
+
+            console.log(reply);
+            return reply;
         });
     }
 

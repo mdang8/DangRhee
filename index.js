@@ -47,7 +47,7 @@ app.post('/webhook/', function (req, res) {
 
         if (event.message && event.message.text) {
             let messageText = event.message.text;
-            sendReply(sender, messageText);
+            chooseReply(sender, messageText);
         }
     }
 
@@ -58,12 +58,12 @@ app.post('/privacy-policy/', function (req, res) {
     res.sendStatus(200);
 });
 
-function chooseReply(message) {
+function chooseReply(sender, message) {
     let databaseConnection = mysql.createConnection({
-        host: databaseConfig.host,
-        user: databaseConfig.user,
-        password: databaseConfig.password,
-        database: databaseConfig.database
+        host: process.env.DATABASE_HOST,
+        user: process.env.DATABASE_USER,
+        password: process.env.DATABASE_PASSWORD,
+        database: 'DangRhee'
     });
 
     databaseConnection.connect();
@@ -94,6 +94,7 @@ function chooseReply(message) {
             queryStr = 'SELECT * FROM WeatherData WHERE zipcode = "94016" AND date = "' + formattedDate + '"';
         } else {
             reply = 'Not a valid location.';
+            sendReply(sender, reply);
         }
 
         databaseConnection.query(queryStr, function(err, results, fields) {
@@ -106,7 +107,21 @@ function chooseReply(message) {
             tempLow = jsonResults.tempLow;
             humidity = jsonResults.humidity;
             precipitation = jsonResults.precipitation;
+
+            if (precipitation === '') {
+                precipitation = 'None';
+            }
+
+            reply = 'The weather for ' + location.toUpperCase() + ' on ' + date + ' is as follows:\n' + 'High Temperature = ' +
+                    tempHigh + ' °F\n' + 'Low Temperature = ' + tempLow + ' °F\n' + 'Humidity = ' + humidity + '%\n' +
+                    'Precipitation = ' + precipitation;
+
+            sendReply(sender, reply);
         });
+
+        databaseConnection.end();
+    } else {
+        sendReply(sender, 'Not a valid request.');
     }
 }
 
