@@ -125,23 +125,23 @@ function chooseReply(sender, message) {
                     'Precipitation = ' + precipitation;
             }
 
-            let url = 'https://graph.facebook.com/v2.6/' + sender.id + '?fields=first_name,last_name&access_token=' +
-                process.env.FB_PAGE_ACCESS_TOKEN;
-
-            request(url, function(error, response, body) {
-                if (error || response.statusCode !== 200) {
-                    throw error;
-                }
-
-                let insertStr = 'INSERT INTO Users VALUES (' + sender.id + ', ' + body.first_name + ', ' + body.last_name + ', 0)';
-                databaseConnection.query(insertStr, function(err, results) {
-                    if (err) {
-                        throw err;
-                    }
-
-                    console.log(results);
-                });
-            });
+            // let url = 'https://graph.facebook.com/v2.6/' + sender.id + '?fields=first_name,last_name&access_token=' +
+            //     process.env.FB_PAGE_ACCESS_TOKEN;
+            //
+            // request(url, function(error, response, body) {
+            //     if (error || response.statusCode !== 200) {
+            //         throw error;
+            //     }
+            //
+            //     let insertStr = 'INSERT INTO Users VALUES (' + sender.id + ', ' + body.first_name + ', ' + body.last_name + ', 0)';
+            //     databaseConnection.query(insertStr, function(err, results) {
+            //         if (err) {
+            //             throw err;
+            //         }
+            //
+            //         console.log(results);
+            //     });
+            // });
 
             sendReply(sender, reply);
         });
