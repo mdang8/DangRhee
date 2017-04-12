@@ -1,6 +1,5 @@
 'use strict';
 
-const databaseConfig = require('./config.js');
 const express = require('express');
 const bodyParser = require('body-parser');
 const request = require('request');
