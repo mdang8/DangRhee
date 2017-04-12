@@ -61,79 +61,79 @@ app.post('/privacy-policy/', function (req, res) {
 function chooseReply(sender, message) {
     sendReply(sender, "Received");
     return;
-    let databaseConnection = mysql.createConnection({
-        host: process.env.DATABASE_HOST,
-        user: process.env.DATABASE_USER,
-        password: process.env.DATABASE_PASSWORD,
-        database: 'DangRhee'
-    });
-
-    databaseConnection.connect();
-    message = message.toLowerCase();
-    let reply, queryStr = '';
-    let tempHigh, tempLow, humidity = 0;
-    let precipitation = '';
-
-    if (message.includes("what was the weather in")) {
-        let splitMsg = message.split(' ');
-        let location = splitMsg[5];
-        let date = splitMsg[7];
-        let splitDate = [];
-
-        if (date.includes('-')) {
-            splitDate = date.split('-');
-        } else if (date.includes('/')) {
-            splitDate = date.split('/');
-        }
-
-        let formattedDate = splitDate[2] + '-' + splitDate[0] + '-' + splitDate[1];
-
-        if (location === 'boston') {
-            queryStr = 'SELECT * FROM WeatherData WHERE zipcode = "02115" AND date = "' + formattedDate + '"';
-        } else if (location === 'new york city') {
-            queryStr = 'SELECT * FROM WeatherData WHERE zipcode = "10001" AND date = "' + formattedDate + '"';
-        } else if (location === 'san francisco') {
-            queryStr = 'SELECT * FROM WeatherData WHERE zipcode = "94016" AND date = "' + formattedDate + '"';
-        } else {
-            reply = 'Not a valid location.';
-            sendReply(sender, reply);
-            return;
-        }
-
-        databaseConnection.query(queryStr, function(err, results, fields) {
-            if (err) {
-                sendReply(sender, 'ERROR: ' + err);
-                databaseConnection.end();
-                return;
-                //throw err;
-            }
-
-            let jsonResults = JSON.parse(JSON.stringify(results[0]));
-            tempHigh = jsonResults.tempHigh;
-            tempLow = jsonResults.tempLow;
-            humidity = jsonResults.humidity;
-            precipitation = jsonResults.precipitation;
-
-            if (precipitation === '') {
-                precipitation = 'None';
-            }
-
-            reply = 'The weather for ' + location.toUpperCase() + ' on ' + date + ' is as follows:\n' + 'High Temperature = ' +
-                    tempHigh + ' °F\n' + 'Low Temperature = ' + tempLow + ' °F\n' + 'Humidity = ' + humidity + '%\n' +
-                    'Precipitation = ' + precipitation;
-
-            sendReply(sender, reply);
-        });
-
-        databaseConnection.end();
-    } else {
-        sendReply(sender, 'Not a valid request.');
-    }
+    // let databaseConnection = mysql.createConnection({
+    //     host: process.env.DATABASE_HOST,
+    //     user: process.env.DATABASE_USER,
+    //     password: process.env.DATABASE_PASSWORD,
+    //     database: 'DangRhee'
+    // });
+    //
+    // databaseConnection.connect();
+    // message = message.toLowerCase();
+    // let reply, queryStr = '';
+    // let tempHigh, tempLow, humidity = 0;
+    // let precipitation = '';
+    //
+    // if (message.includes("what was the weather in")) {
+    //     let splitMsg = message.split(' ');
+    //     let location = splitMsg[5];
+    //     let date = splitMsg[7];
+    //     let splitDate = [];
+    //
+    //     if (date.includes('-')) {
+    //         splitDate = date.split('-');
+    //     } else if (date.includes('/')) {
+    //         splitDate = date.split('/');
+    //     }
+    //
+    //     let formattedDate = splitDate[2] + '-' + splitDate[0] + '-' + splitDate[1];
+    //
+    //     if (location === 'boston') {
+    //         queryStr = 'SELECT * FROM WeatherData WHERE zipcode = "02115" AND date = "' + formattedDate + '"';
+    //     } else if (location === 'new york city') {
+    //         queryStr = 'SELECT * FROM WeatherData WHERE zipcode = "10001" AND date = "' + formattedDate + '"';
+    //     } else if (location === 'san francisco') {
+    //         queryStr = 'SELECT * FROM WeatherData WHERE zipcode = "94016" AND date = "' + formattedDate + '"';
+    //     } else {
+    //         reply = 'Not a valid location.';
+    //         sendReply(sender, reply);
+    //         return;
+    //     }
+    //
+    //     databaseConnection.query(queryStr, function(err, results, fields) {
+    //         if (err) {
+    //             sendReply(sender, 'ERROR: ' + err);
+    //             databaseConnection.end();
+    //             return;
+    //             //throw err;
+    //         }
+    //
+    //         let jsonResults = JSON.parse(JSON.stringify(results[0]));
+    //         tempHigh = jsonResults.tempHigh;
+    //         tempLow = jsonResults.tempLow;
+    //         humidity = jsonResults.humidity;
+    //         precipitation = jsonResults.precipitation;
+    //
+    //         if (precipitation === '') {
+    //             precipitation = 'None';
+    //         }
+    //
+    //         reply = 'The weather for ' + location.toUpperCase() + ' on ' + date + ' is as follows:\n' + 'High Temperature = ' +
+    //                 tempHigh + ' °F\n' + 'Low Temperature = ' + tempLow + ' °F\n' + 'Humidity = ' + humidity + '%\n' +
+    //                 'Precipitation = ' + precipitation;
+    //
+    //         sendReply(sender, reply);
+    //     });
+    //
+    //     databaseConnection.end();
+    // } else {
+    //     sendReply(sender, 'Not a valid request.');
+    // }
 }
 
 function sendReply(sender, text) {
     let messageData = {
-        text:text
+        text: text
     };
 
     request({
