@@ -58,12 +58,14 @@ app.post('/privacy-policy/', function (req, res) {
 });
 
 function chooseReply(sender, message) {
-    message = message.toLowerCase();
+    message.replace('?', '');
+    let splitMsg, splitDate = [];
+    let location, date = '';
     let reply, queryStr = '';
     let tempHigh, tempLow, humidity = 0;
     let precipitation = '';
 
-    if (message.includes("what was the weather in")) {
+    if (message.toLowerCase().includes("what was the weather in")) {
         let databaseConnection = mysql.createConnection({
             host: process.env.DATABASE_HOST,
             user: process.env.DATABASE_USER,
@@ -73,10 +75,10 @@ function chooseReply(sender, message) {
 
         databaseConnection.connect();
 
-        let splitMsg = message.split(' ');
-        let location = splitMsg[5];
-        let date = splitMsg[7];
-        let splitDate = [];
+        splitMsg = message.split(' ');
+        location = splitMsg[5];
+        date = splitMsg[7];
+        splitDate = [];
 
         if (date.includes('-')) {
             splitDate = date.split('-');
