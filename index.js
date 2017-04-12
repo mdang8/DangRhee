@@ -107,19 +107,23 @@ function chooseReply(sender, message) {
                 //throw err;
             }
 
-            let jsonResults = JSON.parse(JSON.stringify(results[0]));
-            tempHigh = jsonResults.tempHigh;
-            tempLow = jsonResults.tempLow;
-            humidity = jsonResults.humidity;
-            precipitation = jsonResults.precipitation;
+            if (results.length === 0) {
+                reply = "Sorry, there doesn't seem to be any data for that date and location.";
+            } else {
+                let jsonResults = JSON.parse(JSON.stringify(results[0]));
+                tempHigh = jsonResults.tempHigh;
+                tempLow = jsonResults.tempLow;
+                humidity = jsonResults.humidity;
+                precipitation = jsonResults.precipitation;
 
-            if (precipitation === '') {
-                precipitation = 'None';
-            }
+                if (precipitation === '') {
+                    precipitation = 'None';
+                }
 
-            reply = 'The weather for ' + location + ' on ' + date + ' is as follows:\n' + 'High Temperature = ' +
+                reply = 'The weather for ' + location + ' on ' + date + ' is as follows:\n' + 'High Temperature = ' +
                     tempHigh + ' °F\n' + 'Low Temperature = ' + tempLow + ' °F\n' + 'Humidity = ' + humidity + '%\n' +
                     'Precipitation = ' + precipitation;
+            }
 
             sendReply(sender, reply);
         });
