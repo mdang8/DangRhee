@@ -59,6 +59,8 @@ app.post('/privacy-policy/', function (req, res) {
 });
 
 function chooseReply(sender, message) {
+    sendReply(sender, "Received");
+    return;
     let databaseConnection = mysql.createConnection({
         host: process.env.DATABASE_HOST,
         user: process.env.DATABASE_USER,
