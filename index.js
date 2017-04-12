@@ -55,53 +55,37 @@ app.listen(app.get('port'), function() {
 // });
 
 app.post('/webhook/', function (req, res) {
-    let messaging_events = req.body.entry[0].messaging;
+    let messaging_events = req.body.entry[0].messaging
     for (let i = 0; i < messaging_events.length; i++) {
-        let event = req.body.entry[0].messaging[i];
-        let sender = event.sender.id;
+        let event = req.body.entry[0].messaging[i]
+        let sender = event.sender.id
         if (event.message && event.message.text) {
-            let text = event.message.text;
-            fs.writeFile('output.txt', text.substring(0, 200), function(err) {
-                if (err) {
-                    return console.log(err);
-                }
-
-                console.log('Logged.');
-            });
-            sendReply(sender, "Text received, echo: " + text.substring(0, 200));
+            let text = event.message.text
+            sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200))
         }
     }
-    res.sendStatus(200);
-});
+    res.sendStatus(200)
+})
 
 app.post('/privacy-policy/', function (req, res) {
     res.sendStatus(200);
 });
 
-function sendReply(sender, messageReceived) {
-    let replyMessage = 'Message received: ' + messageReceived;
-
-    let data = {
-        message: "Test received"
-    };
-
+function sendTextMessage(sender, text) {
+    let messageData = { text:text }
     request({
         url: 'https://graph.facebook.com/v2.6/me/messages',
-        qs: {
-            access_token: page_access_token
-        },
+        qs: {access_token:page_access_token},
         method: 'POST',
         json: {
-            recipient: {
-                id: sender
-            },
-            message: data
+            recipient: {id:sender},
+            message: messageData,
         }
-    }, function(err, res, body) {
-        if (err) {
-            console.error('Error with sending messages: ' + err);
-        } else if (res.body.error) {
-            console.error('Error with response body: ' + res.body.error);
+    }, function(error, response, body) {
+        if (error) {
+            console.log('Error sending messages: ', error)
+        } else if (response.body.error) {
+            console.log('Error: ', response.body.error)
         }
-    });
+    })
 }
