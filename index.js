@@ -95,11 +95,15 @@ function chooseReply(sender, message) {
         } else {
             reply = 'Not a valid location.';
             sendReply(sender, reply);
+            return;
         }
 
         databaseConnection.query(queryStr, function(err, results, fields) {
             if (err) {
-                throw err;
+                sendReply(sender, 'ERROR: ' + err);
+                databaseConnection.end();
+                return;
+                //throw err;
             }
 
             let jsonResults = JSON.parse(JSON.stringify(results[0]));

@@ -7,10 +7,10 @@ chooseReply('What was the weather in Boston on 01/01/2016');
 
 function chooseReply(message) {
     let databaseConnection = mysql.createConnection({
-        host: databaseConfig.host,
-        user: databaseConfig.user,
-        password: databaseConfig.password,
-        database: databaseConfig.database
+        host: 'cs3200.chcuwkw6vl9p.us-west-2.rds.amazonaws.com',
+        user: 'mdang',
+        password: 'mattadmin',
+        database: 'DangRhee'
     });
 
     databaseConnection.connect();
@@ -68,16 +68,4 @@ function chooseReply(message) {
     }
 
     databaseConnection.end();
-}
-
-function createDatabaseConnection() {
-    let connection = mysql.createConnection({
-        host: databaseConfig.host,
-        user: databaseConfig.user,
-        password: databaseConfig.password,
-        database: databaseConfig.database
-    });
-
-    console.log('database connected');
-    return connection.connect();
 }
