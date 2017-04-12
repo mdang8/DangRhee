@@ -134,7 +134,13 @@ function chooseReply(sender, message) {
                 }
 
                 let insertStr = 'INSERT INTO Users VALUES (' + sender.id + ', ' + body.first_name + ', ' + body.last_name + ', 0)';
-                databaseConnection.query(insertStr);
+                databaseConnection.query(insertStr, function(err, results) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    console.log(results);
+                });
             });
 
             sendReply(sender, reply);
