@@ -58,7 +58,7 @@ app.post('/privacy-policy/', function (req, res) {
 });
 
 function chooseReply(sender, message) {
-    message.replace('?', '');
+    message = message.replace('?', '');
     let splitMsg, splitDate = [];
     let location, date = '';
     let reply, queryStr = '';

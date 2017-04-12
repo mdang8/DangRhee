@@ -3,27 +3,29 @@
 const databaseConfig = require('./config.js');
 const mysql = require('mysql');
 
-chooseReply('What was the weather in Boston on 01/01/2016');
+chooseReply('What was the weather in Boston on 01/01/2016?');
 
 function chooseReply(message) {
-    let databaseConnection = mysql.createConnection({
-        host: 'cs3200.chcuwkw6vl9p.us-west-2.rds.amazonaws.com',
-        user: 'mdang',
-        password: 'mattadmin',
-        database: 'DangRhee'
-    });
-
-    databaseConnection.connect();
-    message = message.toLowerCase();
+    message = message.replace('?', '');
+    let splitMsg, splitDate = [];
+    let location, date = '';
     let reply, queryStr = '';
     let tempHigh, tempLow, humidity = 0;
     let precipitation = '';
 
-    if (message.includes("what was the weather in")) {
-        let splitMsg = message.split(' ');
-        let location = splitMsg[5];
-        let date = splitMsg[7];
-        let splitDate = [];
+    if (message.toLowerCase().includes("what was the weather in")) {
+        let databaseConnection = mysql.createConnection({
+            host: 'cs3200.chcuwkw6vl9p.us-west-2.rds.amazonaws.com',
+            user: 'mdang',
+            password: 'mattadmin',
+            database: 'DangRhee'
+        });
+
+        databaseConnection.connect();
+
+        location = message.substring(24, message.lastIndexOf('on') - 1);
+        date = message.substring(message.lastIndexOf('on') + 3);
+        splitDate = [];
 
         if (date.includes('-')) {
             splitDate = date.split('-');
@@ -33,19 +35,24 @@ function chooseReply(message) {
 
         let formattedDate = splitDate[2] + '-' + splitDate[0] + '-' + splitDate[1];
 
-        if (location === 'boston') {
+        if (location.toLowerCase() === 'boston') {
             queryStr = 'SELECT * FROM WeatherData WHERE zipcode = "02115" AND date = "' + formattedDate + '"';
-        } else if (location === 'new york city') {
+        } else if (location.toLowerCase() === 'new york city') {
             queryStr = 'SELECT * FROM WeatherData WHERE zipcode = "10001" AND date = "' + formattedDate + '"';
-        } else if (location === 'san francisco') {
+        } else if (location.toLowerCase() === 'san francisco') {
             queryStr = 'SELECT * FROM WeatherData WHERE zipcode = "94016" AND date = "' + formattedDate + '"';
         } else {
             reply = 'Not a valid location.';
+            console.log(reply);
+            return;
         }
 
         databaseConnection.query(queryStr, function(err, results, fields) {
             if (err) {
-                throw err;
+                console.log('error');
+                databaseConnection.end();
+                return;
+                //throw err;
             }
 
             let jsonResults = JSON.parse(JSON.stringify(results[0]));
@@ -58,14 +65,15 @@ function chooseReply(message) {
                 precipitation = 'None';
             }
 
-            reply = 'The weather for ' + location.toUpperCase() + ' on ' + date + ' is as follows:\n' + 'High Temperature = ' +
+            reply = 'The weather for ' + location + ' on ' + date + ' is as follows:\n' + 'High Temperature = ' +
                 tempHigh + ' °F\n' + 'Low Temperature = ' + tempLow + ' °F\n' + 'Humidity = ' + humidity + '%\n' +
                 'Precipitation = ' + precipitation;
 
             console.log(reply);
-            return reply;
         });
-    }
 
-    databaseConnection.end();
+        databaseConnection.end();
+    } else {
+        console.log('Not a valid request.');
+    }
 }
