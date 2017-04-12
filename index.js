@@ -132,20 +132,13 @@ function chooseReply(sender, message) {
 }
 
 function sendReply(sender, text) {
-    let messageData = {
-        text: text
-    };
-
+    let messageData = { text:text };
     request({
         url: 'https://graph.facebook.com/v2.6/me/messages',
-        qs: {
-            access_token: page_access_token
-        },
+        qs: {access_token:page_access_token},
         method: 'POST',
         json: {
-            recipient: {
-                id: sender
-            },
+            recipient: {id:sender},
             message: messageData,
         }
     }, function(error, response, body) {
