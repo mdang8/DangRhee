@@ -3,6 +3,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const request = require('request');
+const fs = require('fs');
 const app = express();
 
 const verify_token = process.env.FB_WEBHOOK_VERIFY_TOKEN;
@@ -60,10 +61,17 @@ app.post('/webhook/', function (req, res) {
         let sender = event.sender.id;
         if (event.message && event.message.text) {
             let text = event.message.text;
+            fs.writeFile('output.txt', text.substring(0, 200), function(err) {
+                if (err) {
+                    return console.log(err);
+                }
+
+                console.log('Logged.');
+            });
             sendReply(sender, "Text received, echo: " + text.substring(0, 200));
         }
     }
-    res.sendStatus(200)
+    res.sendStatus(200);
 });
 
 app.post('/privacy-policy/', function (req, res) {
