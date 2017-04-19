@@ -21,6 +21,9 @@ app.get('/', function (req, res) {
     res.send('Welcome to DangRhee!');
 });
 
+/**
+ * Verifies token with Facebook
+ */
 app.get('/webhook/', function (req, res) {
     if (req.query['hub.verify_token'] === verify_token) {
         res.send(req.query['hub.challenge']);
@@ -29,6 +32,9 @@ app.get('/webhook/', function (req, res) {
     res.send('Wrong token.');
 });
 
+/**
+ * Provides privacy policy endpoint for Facebook
+ */
 app.get('/privacy-policy/', function (req, res) {
     res.sendStatus(200);
 });
@@ -37,6 +43,9 @@ app.listen(app.get('port'), function() {
     console.log('Running on port', app.get('port'));
 });
 
+/**
+ * Receives message
+ */
 app.post('/webhook/', function (req, res) {
     let messagingEvents = req.body.entry[0].messaging;
 
@@ -59,23 +68,30 @@ app.post('/privacy-policy/', function (req, res) {
 
 function chooseReply(sender, message) {
     message = message.replace('?', '');
+    let lowerMessage = message.toLowerCase();
     let splitMsg, splitDate = [];
-    let location, date = '';
+    let location, date, formattedDate, zipCode = '';
     let reply, queryStr = '';
     let tempHigh, tempLow, humidity = 0;
     let precipitation = '';
+    let readStr = "what was the weather in";
+    let updateStr = "update weather in";
+    let deleteStr = "remove weather in";
 
-    if (message.toLowerCase().includes("what was the weather in")) {
-        let databaseConnection = mysql.createConnection({
-            host: process.env.DATABASE_HOST,
-            user: process.env.DATABASE_USER,
-            password: process.env.DATABASE_PASSWORD,
-            database: 'DangRhee'
-        });
+    // sets up the database credentials
+    let databaseConnection = mysql.createConnection({
+        host: process.env.DATABASE_HOST,
+        user: process.env.DATABASE_USER,
+        password: process.env.DATABASE_PASSWORD,
+        database: 'DangRhee'
+    });
 
+    // read operation
+    if (lowerMessage.includes(readStr)) {
+        // makes the database connection
         databaseConnection.connect();
 
-        location = message.substring(24, message.lastIndexOf('on') - 1);
+        location = message.substring(readStr.length + 1, message.lastIndexOf('on') - 1);
         date = message.substring(message.lastIndexOf('on') + 3);
         splitDate = [];
 
@@ -85,7 +101,8 @@ function chooseReply(sender, message) {
             splitDate = date.split('/');
         }
 
-        let formattedDate = splitDate[2] + '-' + splitDate[0] + '-' + splitDate[1];
+        // formats the date string
+        formattedDate = splitDate[2] + '-' + splitDate[0] + '-' + splitDate[1];
 
         if (location.toLowerCase() === 'boston') {
             queryStr = 'SELECT * FROM WeatherData WHERE zipcode = "02115" AND date = "' + formattedDate + '"';
@@ -99,14 +116,18 @@ function chooseReply(sender, message) {
             return;
         }
 
+        // makes the select query
         databaseConnection.query(queryStr, function(err, results, fields) {
             if (err) {
-                sendReply(sender, 'ERROR: ' + err);
+                // ends the database connection
                 databaseConnection.end();
-                return;
-                //throw err;
+
+                // sends an error message as the reply
+                sendReply(sender, 'ERROR: ' + err);
+                throw err;
             }
 
+            // no rows returned for the query
             if (results.length === 0) {
                 reply = "Sorry, there doesn't seem to be any data for that date and location.";
             } else {
@@ -116,40 +137,119 @@ function chooseReply(sender, message) {
                 humidity = jsonResults.humidity;
                 precipitation = jsonResults.precipitation;
 
+                // precipitation field is an empty string
                 if (precipitation === '') {
                     precipitation = 'None';
                 }
 
+                // the reply string
                 reply = 'The weather for ' + location + ' on ' + date + ' is as follows:\n' + 'High Temperature = ' +
                     tempHigh + ' °F\n' + 'Low Temperature = ' + tempLow + ' °F\n' + 'Humidity = ' + humidity + '%\n' +
                     'Precipitation = ' + precipitation;
             }
 
-            // let url = 'https://graph.facebook.com/v2.6/' + sender.id + '?fields=first_name,last_name&access_token=' +
-            //     process.env.FB_PAGE_ACCESS_TOKEN;
-            //
-            // request(url, function(error, response, body) {
-            //     if (error || response.statusCode !== 200) {
-            //         throw error;
-            //     }
-            //
-            //     let insertStr = 'INSERT INTO Users VALUES (' + sender.id + ', ' + body.first_name + ', ' + body.last_name + ', 0)';
-            //     databaseConnection.query(insertStr, function(err, results) {
-            //         if (err) {
-            //             throw err;
-            //         }
-            //
-            //         console.log(results);
-            //     });
-            // });
+            // URL for getting Facebook user info
+            let url = 'https://graph.facebook.com/v2.6/' + sender.id + '?fields=first_name,last_name&access_token=' +
+                page_access_token;
 
-            sendReply(sender, reply);
+            // makes the GET request to retrieve Facebook user name info
+            request(url, function(error, response, body) {
+                if (error || response.statusCode !== 200) {
+                    throw error;
+                }
+
+                // parses the response body as JSON
+                let jsonBody = JSON.parse(body);
+
+                // SQL insert statement to Users table
+                let insertStr = "CALL add_user('" + sender.id + "', '" + jsonBody.first_name + "', '" + jsonBody.last_name + "')";
+
+                // makes the insert query
+                databaseConnection.query(insertStr, function(err, results) {
+                    if (err) {
+                        databaseConnection.end();
+                        throw err;
+                    }
+
+                    // ends the database connection
+                    databaseConnection.end();
+                    // sends the weather info reply
+                    sendReply(sender, reply);
+                });
+            });
         });
+    } else if (lowerMessage.includes(updateStr)) {  // update operation
+        // makes the database connection
+        databaseConnection.connect();
 
-        databaseConnection.end();
+        location = message.substring(updateStr.length + 1, message.lastIndexOf('on') - 1);
+        date = message.substring(message.lastIndexOf('on') + 3);
+        splitDate = [];
+
+        if (date.includes('-')) {
+            splitDate = date.split('-');
+        } else if (date.includes('/')) {
+            splitDate = date.split('/');
+        }
+
+        // formats the date string
+        formattedDate = splitDate[2] + '-' + splitDate[0] + '-' + splitDate[1];
+
+        zipCode = determineZipCode(location.toLowerCase());
+
+        queryStr = "UPDATE WeatherData SET tempHigh = " + tempHigh + ", tempLow = " + tempLow + ", humidity = " + humidity + ". precipitation = '" + precipitation + "' WHERE zipcode = '" + zipCode + "'";
+
+        databaseConnection.query(queryStr, function (err, results) {
+            if (err) {
+                databaseConnection.end();
+                sendReply(sender, "ERROR: " + err);
+            }
+
+            console.log("Updated: " + results);
+        });
+    } else if (lowerMessage.includes(deleteStr)) {
+        // makes the database connection
+        databaseConnection.connect();
+
+        location = message.substring(deleteStr.length + 1, message.lastIndexOf('on') - 1);
+        date = message.substring(message.lastIndexOf('on') + 3);
+        splitDate = [];
+
+        if (date.includes('-')) {
+            splitDate = date.split('-');
+        } else if (date.includes('/')) {
+            splitDate = date.split('/');
+        }
+
+        // formats the date string
+        formattedDate = splitDate[2] + '-' + splitDate[0] + '-' + splitDate[1];
+
+        zipCode = determineZipCode(location.toLowerCase());
+
+        queryStr = "DELETE FROM WeatherData WHERE zipcode = '" + zipCode + "' AND date = '" + formattedDate + "'";
     } else {
         sendReply(sender, 'Not a valid request.');
     }
+}
+
+function determineZipCode(location) {
+    let zipCode = '';
+
+    switch (location) {
+        case 'boston':
+            zipCode = '02115';
+            break;
+        case 'new york city':
+            zipCode = '10001';
+            break;
+        case 'san francisco':
+            zipCode = '94016';
+            break;
+        default:
+            return 'Invalid location';
+    }
+
+    return zipCode;
 }
 
 function sendReply(sender, text) {
@@ -157,6 +257,7 @@ function sendReply(sender, text) {
         text: text
     };
 
+    // makes the POST request to send the message
     request({
         url: 'https://graph.facebook.com/v2.6/me/messages',
         qs: {
