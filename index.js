@@ -121,10 +121,9 @@ function chooseReply(sender, message) {
             if (err) {
                 // ends the database connection
                 databaseConnection.end();
-
                 // sends an error message as the reply
-                sendReply(sender, 'ERROR: ' + err);
-                throw err;
+                sendReply(sender, "There was an error processing your read request.\n" + err);
+                console.error(err);
             }
 
             // no rows returned for the query
@@ -155,8 +154,10 @@ function chooseReply(sender, message) {
             // makes the GET request to retrieve Facebook user name info
             request(url, function(error, response, body) {
                 if (error || response.statusCode !== 200) {
-                    throw error;
+                    console.error(error);
                 }
+
+                console.log("Sender id: " + sender.id);
 
                 // parses the response body as JSON
                 let jsonBody = JSON.parse(body);
@@ -167,8 +168,11 @@ function chooseReply(sender, message) {
                 // makes the insert query
                 databaseConnection.query(insertStr, function(err, results) {
                     if (err) {
+                        // ends the database connection
                         databaseConnection.end();
-                        throw err;
+                        // sends an error message as the reply
+                        sendReply(sender, "There was an error processing your insert request.\n" + err);
+                        console.error(err);
                     }
 
                     // ends the database connection
@@ -201,11 +205,14 @@ function chooseReply(sender, message) {
 
         databaseConnection.query(queryStr, function (err, results) {
             if (err) {
+                // ends the database connection
                 databaseConnection.end();
-                sendReply(sender, "ERROR: " + err);
+                // sends an error message as the reply
+                sendReply(sender, "There was an error processing your update request.\n" + err);
+                console.error(err);
+            } else {
+                sendReply(sender, "Updated the weather data for " + location + " on " + date + ".");
             }
-
-            console.log("Updated: " + results);
         });
     } else if (lowerMessage.includes(deleteStr)) {
         // makes the database connection
@@ -227,6 +234,18 @@ function chooseReply(sender, message) {
         zipCode = determineZipCode(location.toLowerCase());
 
         queryStr = "DELETE FROM WeatherData WHERE zipcode = '" + zipCode + "' AND date = '" + formattedDate + "'";
+
+        databaseConnection.query(queryStr, function (err, results) {
+            if (err) {
+                // ends the database connection
+                databaseConnection.end();
+                // sends an error message as the reply
+                sendReply(sender, "There was an error processing your delete request.\n" + err);
+                console.error(err);
+            }
+
+            sendReply(sender, "Removed the weather data for " + location + " on " + date + ".");
+        });
     } else {
         sendReply(sender, 'Not a valid request.');
     }
