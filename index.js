@@ -154,7 +154,7 @@ function chooseReply(sender, message) {
             // makes the GET request to retrieve Facebook user name info
             request(url, function(error, response, body) {
                 if (error || response.statusCode !== 200) {
-                    console.error(error);
+                    console.error("Error with request: " + error);
                 }
 
                 console.log("Sender id: " + sender.id);
@@ -209,8 +209,11 @@ function chooseReply(sender, message) {
                 databaseConnection.end();
                 // sends an error message as the reply
                 sendReply(sender, "There was an error processing your update request.\n" + err);
-                console.error(err);
+                console.error("Error with update query: " + err);
             } else {
+                // ends the database connection
+                databaseConnection.end();
+
                 sendReply(sender, "Updated the weather data for " + location + " on " + date + ".");
             }
         });
@@ -241,9 +244,11 @@ function chooseReply(sender, message) {
                 databaseConnection.end();
                 // sends an error message as the reply
                 sendReply(sender, "There was an error processing your delete request.\n" + err);
-                console.error(err);
+                console.error("Error with delete query: " + err);
             }
 
+            // ends the database connection
+            databaseConnection.end();
             sendReply(sender, "Removed the weather data for " + location + " on " + date + ".");
         });
     } else {
