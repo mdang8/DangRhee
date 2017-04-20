@@ -197,7 +197,7 @@ function chooseReply(sender, message) {
         let secondComma = message.indexOf(',', firstComma + 1);
         let thirdComma = message.indexOf(',', secondComma + 1);
 
-        location = message.substring(updateStr.length + 1, message.indexOf('on') - 1);
+        location = message.substring(updateStr.length + 1, message.lastIndexOf('on') - 1);
         date = message.substring(message.lastIndexOf('on') + 3, message.indexOf('(') - 1);
         splitDate = [];
 
