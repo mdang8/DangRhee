@@ -75,8 +75,8 @@ function chooseReply(sender, message) {
     let tempHigh, tempLow, humidity = 0;
     let precipitation = '';
     let readStr = "what was the weather in";
-    let updateStr = "update weather in";
-    let deleteStr = "remove weather in";
+    let updateStr = "update the weather in";
+    let deleteStr = "remove user id";
 
     // sets up the database credentials
     let databaseConnection = mysql.createConnection({
@@ -103,18 +103,9 @@ function chooseReply(sender, message) {
 
         // formats the date string
         formattedDate = splitDate[2] + '-' + splitDate[0] + '-' + splitDate[1];
+        let zipCode = determineZipCode(location);
 
-        if (location.toLowerCase() === 'boston') {
-            queryStr = 'SELECT * FROM WeatherData WHERE zipcode = "02115" AND date = "' + formattedDate + '"';
-        } else if (location.toLowerCase() === 'new york city') {
-            queryStr = 'SELECT * FROM WeatherData WHERE zipcode = "10001" AND date = "' + formattedDate + '"';
-        } else if (location.toLowerCase() === 'san francisco') {
-            queryStr = 'SELECT * FROM WeatherData WHERE zipcode = "94016" AND date = "' + formattedDate + '"';
-        } else {
-            reply = 'Not a valid location.';
-            sendReply(sender, reply);
-            return;
-        }
+        queryStr = "SELECT * FROM WeatherData WHERE zipcode = '" + zipCode + "' AND date = '" + formattedDate + "'";
 
         // makes the select query
         databaseConnection.query(queryStr, function(err, results, fields) {
@@ -232,22 +223,8 @@ function chooseReply(sender, message) {
         // makes the database connection
         databaseConnection.connect();
 
-        location = message.substring(deleteStr.length + 1, message.lastIndexOf('on') - 1);
-        date = message.substring(message.lastIndexOf('on') + 3);
-        splitDate = [];
-
-        if (date.includes('-')) {
-            splitDate = date.split('-');
-        } else if (date.includes('/')) {
-            splitDate = date.split('/');
-        }
-
-        // formats the date string
-        formattedDate = splitDate[2] + '-' + splitDate[0] + '-' + splitDate[1];
-
-        zipCode = determineZipCode(location.toLowerCase());
-
-        queryStr = "DELETE FROM WeatherData WHERE zipcode = '" + zipCode + "' AND date = '" + formattedDate + "'";
+        let id = message.substring(deleteStr.length + 1);
+        queryStr = "DELETE FROM Users WHERE profileId = '" + id + "'";
 
         databaseConnection.query(queryStr, function (err, results) {
             if (err) {
@@ -260,7 +237,7 @@ function chooseReply(sender, message) {
 
             // ends the database connection
             databaseConnection.end();
-            sendReply(sender, "Removed the weather data for " + location + " on " + date + ".");
+            sendReply(sender, "Removed the user id " + id);
         });
     } else {
         sendReply(sender, 'Not a valid request.');
@@ -279,6 +256,12 @@ function determineZipCode(location) {
             break;
         case 'san francisco':
             zipCode = '94016';
+            break;
+        case 'miami':
+            zipCode = '33018';
+            break;
+        case 'chicago':
+            zipCode = '60007';
             break;
         default:
             return 'Invalid location';
