@@ -105,7 +105,19 @@ function chooseReply(sender, message) {
         formattedDate = splitDate[2] + '-' + splitDate[0] + '-' + splitDate[1];
         let zipCode = determineZipCode(location);
 
-        queryStr = "SELECT * FROM WeatherData WHERE zipcode = '" + zipCode + "' AND date = '" + formattedDate + "'";
+        if (location.toLowerCase() === 'boston') {
+            queryStr = 'SELECT * FROM WeatherData WHERE zipcode = "02115" AND date = "' + formattedDate + '"';
+        } else if (location.toLowerCase() === 'new york city') {
+            queryStr = 'SELECT * FROM WeatherData WHERE zipcode = "10001" AND date = "' + formattedDate + '"';
+        } else if (location.toLowerCase() === 'san francisco') {
+            queryStr = 'SELECT * FROM WeatherData WHERE zipcode = "94016" AND date = "' + formattedDate + '"';
+        } else {
+            reply = 'Not a valid location.';
+            sendReply(sender, reply);
+            return;
+        }
+
+        //queryStr = "SELECT * FROM WeatherData WHERE zipcode = '" + zipCode + "' AND date = '" + formattedDate + "' LIMIT 1";
 
         // makes the select query
         databaseConnection.query(queryStr, function(err, results, fields) {
