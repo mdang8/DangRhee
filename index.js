@@ -123,7 +123,7 @@ function chooseReply(sender, message) {
                 databaseConnection.end();
                 // sends an error message as the reply
                 sendReply(sender, "There was an error processing your read request.\n" + err);
-                console.error(err);
+                console.error("Error with request: " + err);
             }
 
             // no rows returned for the query
@@ -186,8 +186,12 @@ function chooseReply(sender, message) {
         // makes the database connection
         databaseConnection.connect();
 
+        let firstComma = message.indexOf(',');
+        let secondComma = message.indexOf(',', firstComma + 1);
+        let thirdComma = message.indexOf(',', secondComma + 1);
+
         location = message.substring(updateStr.length + 1, message.lastIndexOf('on') - 1);
-        date = message.substring(message.lastIndexOf('on') + 3);
+        date = message.substring(message.lastIndexOf('on') + 3, message.indexOf('(') - 1);
         splitDate = [];
 
         if (date.includes('-')) {
@@ -196,12 +200,19 @@ function chooseReply(sender, message) {
             splitDate = date.split('/');
         }
 
+        tempHigh = message.substring(message.indexOf('(') + 1, firstComma);
+        tempLow = message.substring(firstComma + 2, secondComma);
+        humidity = message.substring(secondComma + 2, thirdComma);
+        precipitation = message.substring(thirdComma + 2, message.lastIndexOf(')'));
+
+        console.log(tempHigh + ', ' + tempLow + ', ' + humidity + ', ' + precipitation);
+
         // formats the date string
         formattedDate = splitDate[2] + '-' + splitDate[0] + '-' + splitDate[1];
 
         zipCode = determineZipCode(location.toLowerCase());
 
-        queryStr = "UPDATE WeatherData SET tempHigh = " + tempHigh + ", tempLow = " + tempLow + ", humidity = " + humidity + ". precipitation = '" + precipitation + "' WHERE zipcode = '" + zipCode + "'";
+        queryStr = "UPDATE WeatherData SET tempHigh = " + tempHigh + ", tempLow = " + tempLow + ", humidity = " + humidity + ", precipitation = '" + precipitation + "' WHERE zipcode = '" + zipCode + "' AND date = '" + formattedDate + "'";
 
         databaseConnection.query(queryStr, function (err, results) {
             if (err) {
