@@ -111,6 +111,10 @@ function chooseReply(sender, message) {
             queryStr = 'SELECT * FROM WeatherData WHERE zipcode = "10001" AND date = "' + formattedDate + '"';
         } else if (location.toLowerCase() === 'san francisco') {
             queryStr = 'SELECT * FROM WeatherData WHERE zipcode = "94016" AND date = "' + formattedDate + '"';
+        } else if (location.toLowerCase() === 'chicago') {
+            queryStr = 'SELECT * FROM WeatherData WHERE zipcode = "60007" AND date = "' + formattedDate + '"';
+        } else if (location.toLowerCase() === 'miami') {
+            queryStr = 'SELECT * FROM WeatherData WHERE zipcode = "33018" AND date = "' + formattedDate + '"';
         } else {
             reply = 'Not a valid location.';
             sendReply(sender, reply);
