@@ -3,7 +3,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const request = require('request');
-const mysql = require('mysql');
 const app = express();
 
 const verify_token = process.env.FB_WEBHOOK_VERIFY_TOKEN;
