@@ -46,7 +46,16 @@ app.listen(app.get('port'), function() {
  * Receives message
  */
 app.post('/webhook', function (req, res) {
-    messages.handleMessage(req.body.entry[0], (data) => {
-
-    });
+    if (req.body.object === 'page') {
+        console.log('Received message: ');
+        messages.handleMessage(req.body.entry, (sendResponse) => {
+            if (sendResponse.recipient_id && sendResponse.message_id) {
+                res.sendStatus(200);
+            } else {
+                res.sendStatus(500);
+            }
+        });
+    } else {
+        throw new Error('Request to /webhook not a page object.');
+    }
 });
