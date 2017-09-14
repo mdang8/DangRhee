@@ -52,6 +52,7 @@ app.post('/webhook', function (req, res) {
                 res.sendStatus(200);
             } else {
                 // @TODO handle bad response
+                // temporarily send status code 200
                 res.sendStatus(200);
             }
         });
