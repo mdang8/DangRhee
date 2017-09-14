@@ -4,7 +4,6 @@ const config = require(__dirname + '/config.js');
 const messages = require(__dirname + '/lib/messages.js');
 const express = require('express');
 const bodyParser = require('body-parser');
-const request = require('request');
 
 const verify_token = process.env.FB_WEBHOOK_VERIFY_TOKEN || config.FB_WEBHOOK_VERIFY_TOKEN;
 const page_access_token = process.env.FB_PAGE_ACCESS_TOKEN || config.FB_PAGE_ACCESS_TOKEN;
@@ -47,12 +46,13 @@ app.listen(app.get('port'), function() {
  */
 app.post('/webhook', function (req, res) {
     if (req.body.object === 'page') {
-        console.log('Received message: ');
+        console.log('Received message.');
         messages.handleMessage(req.body.entry, (sendResponse) => {
-            if (sendResponse.recipient_id && sendResponse.message_id) {
+            if (sendResponse.recipient_id !== '' && sendResponse.message_id !== '') {
                 res.sendStatus(200);
             } else {
-                res.sendStatus(500);
+                // @TODO handle bad response
+                res.sendStatus(200);
             }
         });
     } else {
