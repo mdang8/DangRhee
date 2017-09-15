@@ -20,7 +20,7 @@ app.use(bodyParser.urlencoded({
 }));
 
 app.get('/', function (req, res) {
-    res.send('Welcome to DangRhee!');
+    res.status(200).send('Welcome to DangRhee!');
 });
 
 /**
