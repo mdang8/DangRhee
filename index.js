@@ -51,16 +51,24 @@ app.listen(app.get('port'), function () {
 app.post('/webhook', function (req, res) {
     if (req.body.object === 'page') {
         console.log('Received message.');
-        messages.handleMessage(req.body.entry, (sendResponse) => {
-            if (sendResponse.recipient_id !== '' && sendResponse.message_id !== '') {
-                res.sendStatus(200);
-            } else {
-                // @TODO handle bad response
-                // temporarily send status code 200
-                res.sendStatus(200);
-            }
-        });
+        if (req.body.entry) {
+            messages.handleMessage(req.body.entry, (sendResponse) => {
+                if (sendResponse.recipient_id !== '' && sendResponse.message_id !== '') {
+                    res.sendStatus(200);
+                } else {
+                    // @TODO handle bad response
+                    // temporarily send status code 200
+                    res.sendStatus(200);
+                }
+            });
+        } else {
+            console.error('Request body doesn\'t contain an "entry" object.');
+            res.sendStatus(200).send('Sorry, something was wrong with your message.\nError: "Request body doesn\'t' +
+                ' contain an "entry" object.');
+        }
     } else {
-        throw new Error('Request to /webhook not a page object.');
+        console.error('Request to /webhook not a "page" object.');
+        res.sendStatus(200).send('Sorry, something was wrong with your message.\nError: "Request not a "page"' +
+            ' object.');
     }
 });
