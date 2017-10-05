@@ -54,13 +54,17 @@ app.post('/webhook', function (req, res) {
         if (req.body.entry) {
             messages.handleMessage(req.body.entry, (sendResponse) => {
                 if (sendResponse.recipient_id !== '' && sendResponse.message_id !== '') {
-                    res.sendStatus(200);
+                    // @TODO do something after sending response
+                    //res.sendStatus(200);
                 } else {
                     // @TODO handle bad response
                     // temporarily send status code 200
-                    res.sendStatus(200);
+                    //res.sendStatus(200);
                 }
             });
+
+            // send 200 status code to acknowledge receiving the callback
+            res.sendStatus(200);
         } else {
             console.error('Request body doesn\'t contain an "entry" object.');
             res.sendStatus(200).send('Sorry, something was wrong with your message.\nError: "Request body doesn\'t' +
