@@ -10,7 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/mdang8/DangRhee.git"
   },
-  "author": "",
+  "author": "Matt Dang",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/mdang8/DangRhee/issues"
@@ -19,6 +19,10 @@
   "dependencies": {
     "body-parser": "^1.17.0",
     "express": "^4.15.0",
-    "request": "^2.79.0"
+    "request": "^2.79.0",
+    "request-promise": "^4.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^1.12.0"
   }
 }
